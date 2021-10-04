@@ -19,21 +19,35 @@ from scipy import signal
 
 class si3D(object):
 
-    def __init__(self, fnd, nph, nangles, wavelength, na):
-        self.img_stack = tf.imread(fnd) # order of images should be phases, angles, zslices
+    def __init__(self, image, nph, nangles, wavelength, na, dx=0.089, dz=0.2, **kwargs):
+        """
+        Args:
+            image (str or ndarray): either a filepath to open or an ndarray of the expected shape and order
+            nph (int): number of phases
+            nangles (int): number of angles
+            wavelength (float): wavelength in microns
+            na (float): numerical aperture in microns
+            dx (float, optional): pixel size in microns. Defaults to 0.089.
+            dz (float, optional): z step in microns. Defaults to 0.2.
+        """
+        if isinstance(image, str):
+            self.img_stack = tf.imread(image) # order of images should be phases, angles, zslices
+        elif isinstance(image, np.ndarray):
+            self.img_stack = image
         # self.img_stack = self.subback(self.img_stack)
-        self.img_stack = np.pad(self.img_stack, ((2*nph*nangles,2*nph*nangles),(0,0),(0,0)),'constant', constant_values=(0))
+        self.img_stack = np.pad(
+            self.img_stack, ((2 * nph * nangles, 2 * nph * nangles), (0, 0), (0, 0)), 'constant', constant_values=(0))
         print('Image stack loaded succefully')
-        nz,nx,ny = self.img_stack.shape
-        self.nz = int(nz/nph/nangles)
+        nz, nx, ny = self.img_stack.shape
+        self.nz = int(nz / nph / nangles)
         self.nx = nx
         self.ny = ny
-        self.mu = 1e-2 # Wiener parameter
+        self.mu = kwargs.get("mu", default=1.e-2) # Wiener parameter
         self.wl = wavelength # in microns
-        self.cutoff = 1e-3 # remove noise below this relative value in freq. space
+        self.cutoff = kwargs.get("cutoff", default=1.e-3) # remove noise below this relative value in freq. space
         self.na = na # numerical aperture
-        self.dx = 0.089 # pixel size in microns
-        self.dz = 0.2 # z step in microns
+        self.dx = dx # pixel size in microns
+        self.dz = dz # z step in microns
         self.nphases = nph
         self.norders = 5
         self.dpx = 1/((self.nx*2.)*(self.dx/2.)) # calculate pixel size in frequency space

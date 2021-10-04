@@ -5,11 +5,20 @@ An example of running the 3D structured illumination microscopy image reconstruc
 
 """
 
-import sim_3drecon_p36 as si
 import numpy as np
+import tifffile as tf
+import sim_3drecon_p36 as si
 
 fns = r'###'  # raw 3dsim data file
-p = si.si3D(fns,5,3,0.510,1.2)
+p = si.si3D(
+    fns,    # filepath or ndarray NOTE: order of images should be phases, angles, zslices
+    5,      # number of phases
+    3,      # number of angles
+    0.510,  # wavelength in microns
+    1.2,    # numerical aperture
+    0.089,  # pixel size in microns
+    0.2,    # z step in microns
+    )
 
 #set parameters 
 p.mu = 0.02
