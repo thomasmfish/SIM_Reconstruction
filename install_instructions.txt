@@ -1,0 +1,2 @@
+Install cupy from conda
+run `python -m pip install` on this directory (optionally with `-e` for editable)
