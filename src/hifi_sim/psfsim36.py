@@ -7,14 +7,16 @@ This class generates simulated PSFs and OTFs
 """
 
 import numpy as np
-import Utility36 as U
-import Zernike36 as Z
+from scipy.special import j1
+
+from . import Utility36 as U
+from . import Zernike36 as Z
 
 fft2 = np.fft.fft2
 ifft2 = np.fft.ifft2
 fftshift = np.fft.fftshift
 pi = np.pi
-from scipy.special import j1
+
 
 class psf(object):
     ''' code for simulating the point spread function

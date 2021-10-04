@@ -7,7 +7,7 @@ An example of running the 3D structured illumination microscopy image reconstruc
 
 import numpy as np
 import tifffile as tf
-import sim_3drecon_p36 as si
+from hifi_sim import sim_3drecon_p36 as si
 
 fns = r'###'  # raw 3dsim data file
 p = si.si3D(
