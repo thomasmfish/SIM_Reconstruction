@@ -155,4 +155,6 @@ for i in range(len(fnd)):
     np.savetxt(fn, ('1st angle', x0_1, z0, a0, x0_2, b0, 
                     '2nd angle', x1_1, z1, a1, x1_2, b1, 
                     '3rd angle', x2_1, z2, a2, x2_2, b2), fmt='%s')
+
+    p.temp_dir.cleanup()
     del p
