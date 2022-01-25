@@ -8,7 +8,7 @@ requirements = [
     "numpy",
     "matplotlib",
     "scipy",
-    "cupy"
+    # "cupy"
 ]
 
 setuptools.setup(

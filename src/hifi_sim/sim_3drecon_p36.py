@@ -26,14 +26,15 @@ class si3D(object):
         """
         Args:
             image (str or ndarray): either a filepath to open or an ndarray of the expected shape and order
-            nph (int): number of phases
-            nangles (int): number of angles
-            wavelength (float): wavelength in microns
-            na (float): numerical aperture in microns
-            dx (float, optional): pixel size in microns. Defaults to 0.089.
-            dz (float, optional): z step in microns. Defaults to 0.2.
+            nph (int): number of phases 5
+            nangles (int): number of angles 3
+            wavelength (float): wavelength in microns. Dor Diamond choose 0.405, 0.488, 0.561 or 0.647
+            na (float): numerical aperture in microns 0.9 for Diamond
+            dx (float, optional): pixel size in microns. Defaults to 0.089. 0.125 for Diamond
+            dz (float, optional): z step in microns. Defaults to 0.2. 0.125 for Diamond
         """
-        if isinstance(image, str):
+        #Load the image
+        if isinstance(image, (str, os.PathLike)):
             self.img_stack = tf.imread(image) # order of images should be phases, angles, zslices
         elif isinstance(image, np.ndarray):
             self.img_stack = image
@@ -48,36 +49,36 @@ class si3D(object):
         self.nz = int(nz / nph / nangles)
         self.nx = nx
         self.ny = ny
-        self.mu = kwargs.get("mu", default=1.e-2) # Wiener parameter
+        self.mu = kwargs.get("mu", default=1.e-2) # Wiener parameter 0.001 for Diamond (may need to optimise)
         self.wl = wavelength # in microns
         self.cutoff = kwargs.get("cutoff", default=1.e-3) # remove noise below this relative value in freq. space
         self.na = na # numerical aperture
         self.dx = dx # pixel size in microns
         self.dz = dz # z step in microns
-        self.nphases = nph
-        self.norders = 5
+        self.nphases = nph # number of phases
+        self.norders = 5 #orders 0, -1, 1, -2, 2
         self.dpx = 1/((self.nx*2.)*(self.dx/2.)) # calculate pixel size in frequency space
         self.dpz = 1/((self.nz*2.)*(self.dz/2.)) # calculate axial pixel size in frequency space
         self.radius_xy = (2*self.na/self.wl)/self.dpx # NA in pixels
         self.radius_z = ((self.na**2)/(2*self.wl))/self.dpz
-        self.strength = 1.
-        self.sigma = 8.
-        self.eta = 0.08
+        self.strength = 1. #determines strength of the zero-frequency suppression. 1 strongest?
+        self.sigma = 8. #variance. Used in freq suppression
+        self.eta = 0.08 #width of window function? 8% width?
         self.expn = 1.
-        self.axy = 0.8
-        self.az = 0.8
+        self.axy = 0.8 #for apodization
+        self.az = 0.8 #for apodization
         self.zoa = 10e-2
         self.nangle = 0
         self.psf = self.getpsf()
         self.sepmat = self.sepmatrix()
         self.meshgrid()
-        self.winf = self.window(self.eta)
+        self.winf = self.window(self.eta) #window function applied to remove stripe artifacts in the Fourier spectrum.
         self.apd = self.apod()
         self.img_stack = self.img_stack.reshape(self.nz,nangles,nph,nx,ny).swapaxes(0,1).swapaxes(1,2)
 
     def temp_join(self, fn):
         return os.path.join(self.temp_dir.name, fn)
-
+#subtract background
     def subback(self,img):
         hist, bin_edges  = np.histogram(img, bins=np.arange(img.min(),img.max(),256))
         ind = np.where(hist == hist.max())
@@ -231,7 +232,7 @@ class si3D(object):
         return (angmax,spmax,magarr.max())
 
     def getoverlapz(self,angle,spacingx,spacingz):
-        ''' find optimal spacing in z direction for 1st order '''
+        ''' find optimal spacing in z direction for 1st order ''' 
         dx = self.dx / 2
         dz = self.dz / 2
         kx = dx*np.cos(angle)/(spacingx*2)
@@ -507,7 +508,7 @@ class si3D(object):
         return outarr
 
     def pad(self,arr):
-        ''' pad with zeros keeping zero frequency at corner '''
+        ''' pad with zeros keeping zero frequency at corner '''#This is to give space for shifting later
         nz,nx,ny = arr.shape
         out = np.zeros((2*nz,2*nx,2*nx),arr.dtype)
         nxh = np.int(nx/2)
@@ -535,10 +536,10 @@ class si3D(object):
     
     def zerosuppression(self,sz,sx,sy):
         ''' suppress zero frequency in SIM reconstruction '''
-        x = self.xv
+               x = self.xv
         y = self.yv
         z = self.zv
-        g = 1 - self.strength * np.exp(-((x-sx)**2.+(y-sy)**2.+0.*(z-sz)**2.)/(2.*self.sigma**2.))
+        g = 1 - self.strength * np.exp(-((x-sx)**2.+(y-sy)**2.+0.*(z-sz)**2.)/(2.*self.sigma**2.)) #See Karras2019 supplementary info S9 for the same equation
         g[g<0.5] = 0.0
         g[g>=0.5] = 1.0
         return g
@@ -577,9 +578,9 @@ class si3D(object):
         nx = 2*self.nx
         ny = 2*self.ny
         nz = 2*self.nz
-        mu = self.mu
-        ph0 = self.zoa
-        ph1 = mag1*np.exp(1j*phase1)
+        mu = self.mu #Weiner parameter
+        ph0 = self.zoa #10e-2
+        ph1 = mag1*np.exp(1j*phase1) #complex phase gradient, represents the frequency shift?
         ph2 = mag2*np.exp(1j*phase2)
         
         imgf = np.zeros((nz,nx,nx),dtype=np.complex64)
@@ -587,7 +588,7 @@ class si3D(object):
         
         self.Snum = np.zeros((nz,nx,ny),dtype=np.complex64)
         self.Sden = np.zeros((nz,nx,ny),dtype=np.complex64)
-        self.Sden += mu**2
+        self.Sden += mu**2 #Weiner parameter squared (used in eq11 Gustaffson 2008)
         # 0th order
         imgf = tf.imread(self.temp_join('imgf_0.tif'))
         tf.imsave('angle%d_imgf_0.tif'%self.nangle,np.abs(np.fft.fftshift(imgf)).astype(np.float32),photometric='minisblack')

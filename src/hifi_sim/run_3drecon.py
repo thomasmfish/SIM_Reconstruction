@@ -12,14 +12,14 @@ import tifffile as tf
 from . import sim3d_recon_p36 as si
 
 
-fns = r'***' #image path
+fns = r'C:\Users\jin81932\Desktop\TestSIM\20210205-111731_NV10G2_D4C_FL' #image path
 
 class sim3drecon(object):
     
     def __init__(self):
-        self.p = si.si3D(fns,5,3,0.515,1.2)
+        self.p = si.si3D(fns,5,3,0.488,0.9,0.125,0.125)
         #set parameters 
-        self.p.mu = 0.04
+        self.p.mu = 0.04 #Wiener parameter?
         self.p.strength = 1.0
         self.p.sigma = 4
         self.p.eta = 0.1
@@ -29,12 +29,12 @@ class sim3drecon(object):
         self.p.zoa = 1.
         self.inter_results = False
         #angles and spacings estimation
-        self.x0 = np.array([0., 0.280])        
-        self.x1 = np.array([2.094, 0.280])
-        self.x2 = np.array([4.189, 0.280])
-        self.z0 = np.array([1.33])
-        self.z1 = np.array([1.33])
-        self.z2 = np.array([1.33])
+        self.x0 = np.array([0., 0.280]) #1st direction estimates
+        self.x1 = np.array([2.094, 0.280]) #2nd direction estimates    
+        self.x2 = np.array([4.189, 0.280]) #3rd direction estimates
+        self.z0 = np.array([1.33])  #z estimate for 1st direction
+        self.z1 = np.array([1.33]) #z estimate for 2nd direction
+        self.z2 = np.array([1.33]) #z estimate for 3rd direction
         
     def compute(self):
         #search 1st angle
