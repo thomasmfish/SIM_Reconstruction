@@ -22,7 +22,7 @@ from .cupyfft import fftn, ifftn
 
 class si3D(object):
 
-    def __init__(self, image, nph, nangles, wavelength, na, dx=0.089, dz=0.2, **kwargs):
+    def __init__(self, image, wavelength, na, dx=0.089, dz=0.2, **kwargs):
         """
         Args:
             image (str or ndarray): either a filepath to open or an ndarray of the expected shape and order
@@ -45,17 +45,19 @@ class si3D(object):
         
         self.temp_dir = TemporaryDirectory(dir=Path.home(), prefix="SIM_Reconstruction_")
         
-        nz, nx, ny = self.img_stack.shape
-        self.nz = int(nz / nph / nangles)
-        self.nx = nx
-        self.ny = ny
+        # nz, nx, ny = self.img_stack.shape
+        # self.nz = int(nz / nph / nangles)
+        self.img_stack = self.image.swapaxes(1, 2).swapaxes(-2, -1)
+        self.nangle, self.nphases, self.nz, self.nx, self.ny = self.image_stack.shape
+        # self.nx = nx
+        # self.ny = ny
         self.mu = kwargs.get("mu", default=1.e-2) # Wiener parameter 0.001 for Diamond (may need to optimise)
         self.wl = wavelength # in microns
         self.cutoff = kwargs.get("cutoff", default=1.e-3) # remove noise below this relative value in freq. space
         self.na = na # numerical aperture
         self.dx = dx # pixel size in microns
         self.dz = dz # z step in microns
-        self.nphases = nph # number of phases
+        # self.nphases = nph # number of phases
         self.norders = 5 #orders 0, -1, 1, -2, 2
         self.dpx = 1/((self.nx*2.)*(self.dx/2.)) # calculate pixel size in frequency space
         self.dpz = 1/((self.nz*2.)*(self.dz/2.)) # calculate axial pixel size in frequency space
@@ -74,7 +76,8 @@ class si3D(object):
         self.meshgrid()
         self.winf = self.window(self.eta) #window function applied to remove stripe artifacts in the Fourier spectrum.
         self.apd = self.apod()
-        self.img_stack = self.img_stack.reshape(self.nz,nangles,nph,nx,ny).swapaxes(0,1).swapaxes(1,2)
+        # self.img_stack = self.img_stack.reshape(self.nz,nangles,nph,nx,ny).swapaxes(0,1).swapaxes(1,2)  # angle, phase, z
+        
 
     def temp_join(self, fn):
         return os.path.join(self.temp_dir.name, fn)
