@@ -39,8 +39,8 @@ class si3D(object):
         elif isinstance(image, np.ndarray):
             self.img_stack = image
         # self.img_stack = self.subback(self.img_stack)
-        self.img_stack = np.pad(
-            self.img_stack, ((2 * nph * nangles, 2 * nph * nangles), (0, 0), (0, 0)), 'constant', constant_values=(0))
+        # self.img_stack = np.pad(
+        #     self.img_stack, ((2 * nph * nangles, 2 * nph * nangles), (0, 0), (0, 0)), 'constant', constant_values=(0))
         print('Image stack loaded succefully')
         
         self.temp_dir = TemporaryDirectory(dir=Path.home(), prefix="SIM_Reconstruction_")
