@@ -56,11 +56,11 @@ class si3D(object):
         self.nx = nx
         self.ny = ny
         self.mu = kwargs.get(
-            "mu", default=1.0e-2
+            "mu", 1.0e-2
         )  # Wiener parameter 0.001 for Diamond (may need to optimise)
         self.wl = wavelength  # in microns
         self.cutoff = kwargs.get(
-            "cutoff", default=1.0e-3
+            "cutoff", 1.0e-3
         )  # remove noise below this relative value in freq. space
         self.na = na  # numerical aperture
         self.dx = dx  # pixel size in microns
