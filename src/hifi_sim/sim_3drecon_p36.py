@@ -539,7 +539,7 @@ class si3D(object):
     
     def zerosuppression(self,sz,sx,sy):
         ''' suppress zero frequency in SIM reconstruction '''
-               x = self.xv
+        x = self.xv
         y = self.yv
         z = self.zv
         g = 1 - self.strength * np.exp(-((x-sx)**2.+(y-sy)**2.+0.*(z-sz)**2.)/(2.*self.sigma**2.)) #See Karras2019 supplementary info S9 for the same equation
