@@ -11,7 +11,7 @@ from hifi_sim import sim_3drecon_p36 as si
 
 
 def main():
-    fns = r"C:\Users\jin81932\Desktop\TestSIM\20210205-111731_NV10G2_D4C_FL"  # raw 3dsim data file
+    fns = r"C:\Users\jin81932\Desktop\TestSIM\20210205-111731_NV10G2_D4C_FL.tif"  # raw 3dsim data file
     nphases = 5
     nangles = 3
     # fns is ordered: angles, zs, phases (0, 1, 2)
