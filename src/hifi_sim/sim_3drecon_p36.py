@@ -92,10 +92,8 @@ class si3D(object):
             self.eta
         )  # window function applied to remove stripe artifacts in the Fourier spectrum.
         self.apd = self.apod()
-        self.img_stack = (
-            self.img_stack.reshape(self.nz, nangles, nph, nx, ny)
-            .swapaxes(0, 1)
-            .swapaxes(1, 2)
+        self.img_stack = self.img_stack.reshape(nangles, self.nz, nph, nx, ny).swapaxes(
+            1, 2
         )
 
     def temp_join(self, fn):
