@@ -7,7 +7,6 @@ An example of running the 3D structured illumination microscopy image reconstruc
 
 import numpy as np
 import tifffile as tf
-import mrcfile
 from hifi_sim import sim_3drecon_p36 as si
 
 def main():
@@ -16,8 +15,8 @@ def main():
     nangles = 3
     # fns is ordered: angles, zs, phases (0, 1, 2)
     # target is: zs, angles, phases (0, 2, 1)
-    with mrcfile.open(fns) as mrc:
-        array = mrc.data
+    with tf.TiffFile(fns) as tif:
+        array = tif.asarray()
     p = si.si3D(
         array, # filepath or ndarray NOTE: order of images should be phases, angles, zslices
         # nphases, # number of phases
